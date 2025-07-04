@@ -9,7 +9,7 @@
 
 #define ELEMENTS_PER_THREAD 8
 
-#define USE_FLOAT4 1
+#define USE_FLOAT4 0
 template <int BLOCK_SIZE>
 __global__ void MatrixMulCUDA(float *C, float *A, float *B, int wA, int wB,
                               int hA) {
@@ -52,6 +52,8 @@ __global__ void MatrixMulCUDA(float *C, float *A, float *B, int wA, int wB,
 #pragma unroll
     for (int k = 0; k < BLOCK_SIZE; ++k) {
 #if USE_FLOAT4
+      // Woudn't work, probably need to find some crazy cuda inst for that... 
+      // TODO
       float4 b_vec = make_float4(Bs[k][tx], Bs[k][tx], Bs[k][tx], Bs[k][tx]);
       for (int i = 0; i < ELEMENTS_PER_THREAD; i += 4) {
         if (i + 3 < ELEMENTS_PER_THREAD) {
