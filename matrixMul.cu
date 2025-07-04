@@ -152,9 +152,8 @@ int MatrixMultiply(int argc, char **argv, int block_size, const dim3 &dimsA,
   checkCudaErrors(cudaMallocHost(&h_B, mem_size_B));
   cudaStream_t stream;
 
-  int multiplier = 2;
   GradientInit(h_A, dimsA.x, dimsA.y);
-  ConstantInit(h_B, size_B, multiplier);
+  ConstantInit(h_B, size_B);
 
   int min_dim = (dimsB.x < dimsB.y) ? dimsB.x : dimsB.y;
   for (int i = 0; i < min_dim; i++) {
