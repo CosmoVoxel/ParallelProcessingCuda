@@ -9,7 +9,6 @@
 
 #define ELEMENTS_PER_THREAD 8
 
-#define USE_FLOAT4 0
 template <int BLOCK_SIZE>
 __global__ void MatrixMulCUDA(float *C, float *A, float *B, int wA, int wB,
                               int hA) {
@@ -50,37 +49,11 @@ __global__ void MatrixMulCUDA(float *C, float *A, float *B, int wA, int wB,
     __syncthreads();
 
 #pragma unroll
+    // Tile multiplication accumulation
     for (int k = 0; k < BLOCK_SIZE; ++k) {
-#if USE_FLOAT4
-      // Woudn't work, probably need to find some crazy cuda inst for that... 
-      // TODO
-      float4 b_vec = make_float4(Bs[k][tx], Bs[k][tx], Bs[k][tx], Bs[k][tx]);
-      for (int i = 0; i < ELEMENTS_PER_THREAD; i += 4) {
-        if (i + 3 < ELEMENTS_PER_THREAD) {
-          float4 a_vec = make_float4(As[ty + i * BLOCK_SIZE][k],
-                                     As[ty + (i + 1) * BLOCK_SIZE][k],
-                                     As[ty + (i + 2) * BLOCK_SIZE][k],
-                                     As[ty + (i + 3) * BLOCK_SIZE][k]);
-
-          float4 result = make_float4(a_vec.x * b_vec.x, a_vec.y * b_vec.y,
-                                      a_vec.z * b_vec.z, a_vec.w * b_vec.w);
-
-          Csub[i] += result.x;
-          Csub[i + 1] += result.y;
-          Csub[i + 2] += result.z;
-          Csub[i + 3] += result.w;
-        } else {
-          for (int j = i; j < ELEMENTS_PER_THREAD; j++) {
-            Csub[j] += As[ty + j * BLOCK_SIZE][k] * Bs[k][tx];
-          }
-          break;
-        }
-      }
-#else
       for (int i = 0; i < ELEMENTS_PER_THREAD; i++) {
         Csub[i] += As[ty + i * BLOCK_SIZE][k] * Bs[k][tx];
       }
-#endif
     }
 
     __syncthreads();
@@ -95,9 +68,6 @@ __global__ void MatrixMulCUDA(float *C, float *A, float *B, int wA, int wB,
     }
   }
 }
-
-#define MAX_VAL 1.0f
-#define MIN_VAL 0.0f
 
 void ConstantInit(float *data, int size, float val) {
   for (int i = 0; i < size; ++i) {
