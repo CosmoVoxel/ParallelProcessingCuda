@@ -41,3 +41,4 @@ Makefile
 *.swp
 *.bak
 *.tmp
+.clangd
