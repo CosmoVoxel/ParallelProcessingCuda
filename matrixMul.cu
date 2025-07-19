@@ -8,10 +8,10 @@
 #include "helper_cuda.h"
 
 #define ELEMENTS_PER_THREAD_X                                                  \
-  2 // Number of elements that each thread will process sequentially (in
+  1 // Number of elements that each thread will process sequentially (in
     // separate X Blocks)
 #define ELEMENTS_PER_THREAD_Y                                                  \
-  2 // Number of elements that each thread will process sequentially (in
+  1 // Number of elements that each thread will process sequentially (in
     // separate Y Blocks)
 
 template <int BLOCK_SIZE>
@@ -45,7 +45,7 @@ __global__ void MatrixMulCUDA(float *C, float *A, float *B, int wA, int wB,
     }
 #pragma unroll
     for (int i = 0; i < ELEMENTS_PER_THREAD_Y; i++) {
-      Bs[ty][tx +  + i * BLOCK_SIZE] = B[b + (wB * ty) + (i * BLOCK_SIZE) + tx]; //  i * BLOCK_SIZE -> stride for blocks
+      Bs[ty][tx + i * BLOCK_SIZE] = B[b + (wB * ty) + (i * BLOCK_SIZE) + tx]; //  i * BLOCK_SIZE -> stride for blocks
     }
 
     __syncthreads();
@@ -79,11 +79,11 @@ void ConstantInit(float *data, int size, float val) {
   }
 }
 
-void GradientInit(float *data, int width, int height, int multiplier = 1) {
+void GradientInit(float *data, int width, int height) {
   for (int row = 0; row < height; row++) {
     for (int col = 0; col < width; col++) {
       float gradient_value = (float)col / (float)(width - 1);
-      data[row * width + col] = gradient_value * multiplier;
+      data[row * width + col] = gradient_value;
     }
   }
 }
@@ -126,7 +126,7 @@ int MatrixMultiply(int argc, char **argv, int block_size, const dim3 &dimsA,
   checkCudaErrors(cudaMallocHost(&h_B, mem_size_B));
   cudaStream_t stream;
 
-  GradientInit(h_A, size_A, size_A / dimsA.x);
+  GradientInit(h_A, dimsA.x, dimsA.y);
   ConstantInit(h_B, size_B, 1.0f);
 
   int min_dim = (dimsB.x < dimsB.y) ? dimsB.x : dimsB.y;
