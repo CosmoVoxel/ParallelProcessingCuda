@@ -41,13 +41,30 @@ __global__ void MatrixMulCUDA(float *C, float *A, float *B, int wA, int wB,
     __shared__ float Bs[BLOCK_SIZE][ELEMENTS_PER_THREAD_Y * BLOCK_SIZE];
 
     // Bs[ty][tx] = B[b + wB * ty + tx];
-#pragma unroll // pragma unroll -- compiler directive to try to unroll the loop 
+#pragma unroll // pragma unroll -- compiler directive to try to unroll the loop
     for (int i = 0; i < ELEMENTS_PER_THREAD_X; i++) {
-      As[ty + i * BLOCK_SIZE][tx] = A[a + wA * (ty + i * BLOCK_SIZE) + tx];  //  i * BLOCK_SIZE -> stride for blocks 
+      int row = ty + i * BLOCK_SIZE;
+      int col = a + tx;
+      if (row < hA && col < wA) {
+        As[ty + i * BLOCK_SIZE][tx] =
+            A[a + wA * (ty + i * BLOCK_SIZE) +
+              tx]; //  i * BLOCK_SIZE -> stride for blocks
+      } else {
+        As[ty + i * BLOCK_SIZE][tx] = 0.0f;
+      }
     }
 #pragma unroll
     for (int i = 0; i < ELEMENTS_PER_THREAD_Y; i++) {
-      Bs[ty][tx + i * BLOCK_SIZE] = B[b + (wB * ty) + (i * BLOCK_SIZE) + tx]; //  i * BLOCK_SIZE -> stride for blocks
+      const int row = (b / wB) + ty;       
+      const int col = tx + i * BLOCK_SIZE;
+      if (row < wB && col < wB) {
+        Bs[ty][col] =
+            B[b + (wB * ty) + col]; //  i * BLOCK_SIZE -> stride for blocks
+      } else {
+        Bs[ty][col] = 0.0f;
+      }
+      // Bs[ty][col] = B[b + (wB * ty) + col]; //  i * BLOCK_SIZE -> stride for
+      // blocks
     }
 
     __syncthreads();
@@ -69,8 +86,9 @@ __global__ void MatrixMulCUDA(float *C, float *A, float *B, int wA, int wB,
     for (int j = 0; j < ELEMENTS_PER_THREAD_Y; j++) {
       int row = (by * BLOCK_SIZE * ELEMENTS_PER_THREAD_X) + ty + i * BLOCK_SIZE;
       int col = (bx * BLOCK_SIZE * ELEMENTS_PER_THREAD_Y) + tx + j * BLOCK_SIZE;
-
-      C[row * wB + col] = Csub[j + i * ELEMENTS_PER_THREAD_Y];
+      if (row < hA && col < wB) {
+        C[row * wB + col] = Csub[j + i * ELEMENTS_PER_THREAD_Y];
+      }
     }
   }
 }
@@ -86,18 +104,6 @@ void GradientInit(float *data, int width, int height) {
     for (int col = 0; col < width; col++) {
       float gradient_value = (float)col / (float)(width - 1);
       data[row * width + col] = gradient_value;
-    }
-  }
-}
-
-void NormalizationInit(float *data, int width, int height, int original_width) {
-  for (int row = 0; row < height; row++) {
-    for (int col = 0; col < width; col++) {
-      if (row == col && row < width && row < height) {
-        data[row * width + col] = (float)original_width;
-      } else {
-        data[row * width + col] = 0.0f;
-      }
     }
   }
 }
@@ -165,9 +171,11 @@ int MatrixMultiply(int argc, char **argv, int block_size, const dim3 &dimsA,
 
   dim3 threads(block_size, block_size);
 
-  int grid_x = (dimsB.x + ELEMENTS_PER_THREAD_Y * threads.x - 1) / (ELEMENTS_PER_THREAD_Y * threads.x);
-  int grid_y = (dimsA.y + ELEMENTS_PER_THREAD_X * threads.y - 1) / (ELEMENTS_PER_THREAD_X * threads.y);
-  
+  int grid_x = (dimsB.x + ELEMENTS_PER_THREAD_Y * threads.x - 1) /
+               (ELEMENTS_PER_THREAD_Y * threads.x);
+  int grid_y = (dimsA.y + ELEMENTS_PER_THREAD_X * threads.y - 1) /
+               (ELEMENTS_PER_THREAD_X * threads.y);
+
   dim3 grid(grid_x, grid_y, 1);
 
   printf("Computing result using CUDA Kernel...\n");
