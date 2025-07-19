@@ -165,8 +165,8 @@ int MatrixMultiply(int argc, char **argv, int block_size, const dim3 &dimsA,
 
   dim3 threads(block_size, block_size);
 
-  int grid_x = (dimsB.x + ELEMENTS_PER_THREAD_Y * threads.x - 1) / (ELEMENTS_PER_THREAD_Y * threads.x);
-  int grid_y = (dimsA.y + ELEMENTS_PER_THREAD_X * threads.y - 1) / (ELEMENTS_PER_THREAD_X * threads.y);
+  int grid_x = dimsB.x / threads.x / ELEMENTS_PER_THREAD_Y;
+  int grid_y = dimsA.y / threads.y / ELEMENTS_PER_THREAD_X;
 
   dim3 grid(grid_x, grid_y, 1);
 
