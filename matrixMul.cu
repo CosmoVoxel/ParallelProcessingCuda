@@ -10,10 +10,10 @@
 #include "helper_functions.h"
 
 #define ELEMENTS_PER_THREAD_X                                                  \
-  2 // Number of elements that each thread will process sequentially (in
+  6 // Number of elements that each thread will process sequentially (in
     // separate X Blocks)
 #define ELEMENTS_PER_THREAD_Y                                                  \
-  2 // Number of elements that each thread will process sequentially (in
+  6 // Number of elements that each thread will process sequentially (in
     // separate Y Blocks)
 
 template <int BLOCK_SIZE>
