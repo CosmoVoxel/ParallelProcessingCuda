@@ -10,10 +10,10 @@
 #include "helper_functions.h"
 
 #define ELEMENTS_PER_THREAD_X                                                  \
-  4 // Number of elements that each thread will process sequentially (in
+  8 // Number of elements that each thread will process sequentially (in
     // separate X Blocks)
 #define ELEMENTS_PER_THREAD_Y                                                  \
-  4 // Number of elements that each thread will process sequentially (in
+  1 // Number of elements that each thread will process sequentially (in
     // separate Y Blocks)
 
 template <int BLOCK_SIZE>
@@ -82,6 +82,12 @@ void ConstantInit(float *data, int size, float val) {
   }
 }
 
+void RandomInit(float *data, int size) {
+  for (int i = 0; i < size; ++i) {
+    data[i] = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+  }
+}
+
 void GradientInit(float *data, int width, int height) {
   for (int row = 0; row < height; row++) {
     for (int col = 0; col < width; col++) {
@@ -117,8 +123,8 @@ int MatrixMultiply(int argc, char **argv, int block_size, const dim3 &dimsA,
   checkCudaErrors(cudaMallocHost(&h_B, mem_size_B));
   cudaStream_t stream;
 
-  GradientInit(h_A, dimsA.x, dimsA.y);
-  ConstantInit(h_B, size_B, 1.0f);
+  RandomInit(h_A, size_A);
+  RandomInit(h_B, size_B);
 
   int min_dim = (dimsB.x < dimsB.y) ? dimsB.x : dimsB.y;
   for (int i = 0; i < min_dim; i++) {
@@ -227,6 +233,7 @@ int MatrixMultiply(int argc, char **argv, int block_size, const dim3 &dimsA,
   bool correct = true;
 
   double eps = 1.e-4;
+  int error_count = 0;
   for (int i = 0; i < dimsC.y; i++) {
     for (int j = 0; j < dimsC.x; j++) {
       float val = h_C[i * dimsC.x + j];
@@ -235,6 +242,7 @@ int MatrixMultiply(int argc, char **argv, int block_size, const dim3 &dimsA,
         if (fabs(ref) > eps) {
           printf("Error at (%d, %d): GPU result = %f, CPU result = %f\n", i, j,
                  val, ref);
+          error_count++;
           correct = false;
         }
       }
@@ -244,6 +252,9 @@ int MatrixMultiply(int argc, char **argv, int block_size, const dim3 &dimsA,
   }
 
   printf("%s\n", correct ? "Result = PASS" : "Result = FAIL");
+  if (error_count > 0) {
+    printf("Total errors: %d\n", error_count);
+  }
 
   checkCudaErrors(cudaFreeHost(h_A));
   checkCudaErrors(cudaFreeHost(h_B));
@@ -344,7 +355,8 @@ int main(int argc, char **argv) {
   printf("MatrixA(%d,%d), MatrixB(%d,%d)\n", dimsA.x, dimsA.y, dimsB.x,
          dimsB.y);
 
-  printf("ELEMENTS PER THREAD: %d\n", ELEMENTS_PER_THREAD_X);
+  printf("X ELEMENTS PER THREAD: %d\n", ELEMENTS_PER_THREAD_X);
+  printf("Y ELEMENTS PER THREAD: %d\n", ELEMENTS_PER_THREAD_Y);
 
   printf("Grid SIZE: (%d, %d)\n", (int)(dimsB.x / block_size),
          (int)((dimsA.y + ELEMENTS_PER_THREAD_X * block_size - 1) /
