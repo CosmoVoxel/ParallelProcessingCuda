@@ -242,7 +242,6 @@ int MatrixMultiply(int argc, char **argv, int block_size, const dim3 &dimsA,
           printf("Error at (%d, %d): GPU result = %f, CPU result = %f\n", i, j,
                  val, ref);
           correct = false;
-          break;
         }
       }
     }
