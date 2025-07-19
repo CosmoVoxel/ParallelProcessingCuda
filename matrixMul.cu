@@ -8,10 +8,10 @@
 #include "helper_cuda.h"
 
 #define ELEMENTS_PER_THREAD_X                                                  \
-  8 // Number of elements what each thread will process sequentially (in
+  2 // Number of elements that each thread will process sequentially (in
     // separate X Blocks)
 #define ELEMENTS_PER_THREAD_Y                                                  \
-  1 // Number of elements what each thread will process sequentially (in
+  2 // Number of elements that each thread will process sequentially (in
     // separate Y Blocks)
 
 template <int BLOCK_SIZE>
@@ -26,63 +26,49 @@ __global__ void MatrixMulCUDA(float *C, float *A, float *B, int wA, int wB,
   int aBegin = wA * ELEMENTS_PER_THREAD_X * BLOCK_SIZE * by;
   int aEnd = aBegin + wA - 1;
   int aStep = BLOCK_SIZE;
-  int bBegin = BLOCK_SIZE * bx;
+  int bBegin = BLOCK_SIZE * bx * ELEMENTS_PER_THREAD_Y;
   int bStep = BLOCK_SIZE * wB;
 
   const int total_elements = ELEMENTS_PER_THREAD_X * ELEMENTS_PER_THREAD_Y;
 
-  float Csub[total_elements];
-  for (int i = 0; i < total_elements; i++) {
-    Csub[i] = 0.0f;
-  }
+  float Csub[total_elements] = {0.0f};
 
   for (int a = aBegin, b = bBegin; a <= aEnd; a += aStep, b += bStep) {
 
     __shared__ float As[ELEMENTS_PER_THREAD_X * BLOCK_SIZE][BLOCK_SIZE];
     __shared__ float Bs[ELEMENTS_PER_THREAD_Y * BLOCK_SIZE][BLOCK_SIZE];
 
-    // Compute the rows of ELEMENRS_PER_THREAD_Y
-    for (int i = 0; i < ELEMENTS_PER_THREAD_Y; i++) {
-      int global_row = ELEMENTS_PER_THREAD_Y * BLOCK_SIZE * bx + tx;
-      if (global_row < wB) {
-                                                 // ty + i * BLOCK_SIZE -> stride 
-        Bs[ty + i * BLOCK_SIZE][tx] = B[b + wB * (ty + i * BLOCK_SIZE) + tx];
-      } else {
-        Bs[ty + i * BLOCK_SIZE][tx] = 0.0f;
-      }
-    }
-
     // Bs[ty][tx] = B[b + wB * ty + tx];
-
+#pragma unroll // pragma unroll -- compiler directive to try to unroll the loop 
     for (int i = 0; i < ELEMENTS_PER_THREAD_X; i++) {
-      int global_row =
-          ELEMENTS_PER_THREAD_X * BLOCK_SIZE * by + (ty + i * BLOCK_SIZE);
-      if (global_row < hA) {
-        As[ty + i * BLOCK_SIZE][tx] = A[a + wA * (ty + i * BLOCK_SIZE) + tx];
-      } else {
-        As[ty + i * BLOCK_SIZE][tx] = 0.0f;
-      }
+      As[ty + i * BLOCK_SIZE][tx] = A[a + wA * (ty + i * BLOCK_SIZE) + tx];  //  i * BLOCK_SIZE -> stride for blocks 
+    }
+#pragma unroll
+    for (int i = 0; i < ELEMENTS_PER_THREAD_Y; i++) {
+      Bs[ty][tx +  + i * BLOCK_SIZE] = B[b + (wB * ty) + (i * BLOCK_SIZE) + tx]; //  i * BLOCK_SIZE -> stride for blocks
     }
 
     __syncthreads();
 
 #pragma unroll
-    // Tile multiplication accumulation
     for (int k = 0; k < BLOCK_SIZE; ++k) {
       for (int i = 0; i < ELEMENTS_PER_THREAD_X; i++) {
-        Csub[i] += As[ty + i * BLOCK_SIZE][k] * Bs[k][tx];
+        for (int j = 0; j < ELEMENTS_PER_THREAD_Y; j++) {
+          Csub[j + i * ELEMENTS_PER_THREAD_Y] +=
+              As[ty + i * BLOCK_SIZE][k] * Bs[k][tx + j * BLOCK_SIZE];
+        }
       }
     }
 
     __syncthreads();
   }
 
-  int c = wB * ELEMENTS_PER_THREAD_X * BLOCK_SIZE * by + BLOCK_SIZE * bx;
   for (int i = 0; i < ELEMENTS_PER_THREAD_X; i++) {
-    int global_row =
-        ELEMENTS_PER_THREAD_X * BLOCK_SIZE * by + (ty + i * BLOCK_SIZE);
-    if (global_row < hA) {
-      C[c + wB * (ty + i * BLOCK_SIZE) + tx] = Csub[i];
+    for (int j = 0; j < ELEMENTS_PER_THREAD_Y; j++) {
+      int row = (by * BLOCK_SIZE * ELEMENTS_PER_THREAD_X) + ty + i * BLOCK_SIZE;
+      int col = (bx * BLOCK_SIZE * ELEMENTS_PER_THREAD_Y) + tx + j * BLOCK_SIZE;
+
+      C[row * wB + col] = Csub[j + i * ELEMENTS_PER_THREAD_Y];
     }
   }
 }
