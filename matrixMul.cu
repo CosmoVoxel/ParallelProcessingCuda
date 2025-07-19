@@ -36,7 +36,7 @@ __global__ void MatrixMulCUDA(float *C, float *A, float *B, int wA, int wB,
   for (int a = aBegin, b = bBegin; a <= aEnd; a += aStep, b += bStep) {
 
     __shared__ float As[ELEMENTS_PER_THREAD_X * BLOCK_SIZE][BLOCK_SIZE];
-    __shared__ float Bs[ELEMENTS_PER_THREAD_Y * BLOCK_SIZE][BLOCK_SIZE];
+    __shared__ float Bs[BLOCK_SIZE][ELEMENTS_PER_THREAD_Y * BLOCK_SIZE];
 
     // Bs[ty][tx] = B[b + wB * ty + tx];
 #pragma unroll // pragma unroll -- compiler directive to try to unroll the loop 
