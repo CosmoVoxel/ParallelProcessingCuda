@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <cmath>
 #include <cstdio>
 #include <stdio.h>
 
@@ -6,6 +7,7 @@
 #include <cuda_runtime.h>
 
 #include "helper_cuda.h"
+#include "helper_functions.h"
 
 #define ELEMENTS_PER_THREAD_X                                                  \
   1 // Number of elements that each thread will process sequentially (in
