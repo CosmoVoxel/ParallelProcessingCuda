@@ -10,10 +10,10 @@
 #include "helper_functions.h"
 
 #define ELEMENTS_PER_THREAD_X                                                  \
-  1 // Number of elements that each thread will process sequentially (in
+  2 // Number of elements that each thread will process sequentially (in
     // separate X Blocks)
 #define ELEMENTS_PER_THREAD_Y                                                  \
-  1 // Number of elements that each thread will process sequentially (in
+  2 // Number of elements that each thread will process sequentially (in
     // separate Y Blocks)
 
 template <int BLOCK_SIZE>
@@ -165,10 +165,10 @@ int MatrixMultiply(int argc, char **argv, int block_size, const dim3 &dimsA,
 
   dim3 threads(block_size, block_size);
 
-  dim3 grid(dimsB.x / threads.x,
-            (dimsA.y + ELEMENTS_PER_THREAD_X * threads.y - 1) /
-                (ELEMENTS_PER_THREAD_X * threads.y),
-            1);
+  int grid_x = (dimsB.x + ELEMENTS_PER_THREAD_Y * threads.x - 1) / (ELEMENTS_PER_THREAD_Y * threads.x);
+  int grid_y = (dimsA.y + ELEMENTS_PER_THREAD_X * threads.y - 1) / (ELEMENTS_PER_THREAD_X * threads.y);
+
+  dim3 grid(grid_x, grid_y, 1);
 
   printf("Computing result using CUDA Kernel...\n");
 
