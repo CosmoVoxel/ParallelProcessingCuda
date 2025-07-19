@@ -13,7 +13,7 @@
   8 // Number of elements that each thread will process sequentially (in
     // separate X Blocks)
 #define ELEMENTS_PER_THREAD_Y                                                  \
-  1 // Number of elements that each thread will process sequentially (in
+  2 // Number of elements that each thread will process sequentially (in
     // separate Y Blocks)
 
 template <int BLOCK_SIZE>
@@ -44,7 +44,7 @@ __global__ void MatrixMulCUDA(float *C, float *A, float *B, int wA, int wB,
     for (int i = 0; i < ELEMENTS_PER_THREAD_X; i++) {
       int row = ty + i * BLOCK_SIZE;
       int col = tx;
-      As[row][tx] = A[a + wA * row + col]; 
+      As[row][tx] = A[a + wA * row + col];
     }
 #pragma unroll
     for (int i = 0; i < ELEMENTS_PER_THREAD_Y; i++) {
@@ -71,7 +71,9 @@ __global__ void MatrixMulCUDA(float *C, float *A, float *B, int wA, int wB,
     for (int j = 0; j < ELEMENTS_PER_THREAD_Y; j++) {
       int row = (by * BLOCK_SIZE * ELEMENTS_PER_THREAD_X) + ty + i * BLOCK_SIZE;
       int col = (bx * BLOCK_SIZE * ELEMENTS_PER_THREAD_Y) + tx + j * BLOCK_SIZE;
-      C[row * wB + col] = Csub[j + i * ELEMENTS_PER_THREAD_Y];
+      if (row < hA && col < wB) {
+        C[row * wB + col] = Csub[j + i * ELEMENTS_PER_THREAD_Y];
+      }
     }
   }
 }
@@ -165,8 +167,10 @@ int MatrixMultiply(int argc, char **argv, int block_size, const dim3 &dimsA,
   // int grid_y = (dimsA.y + ELEMENTS_PER_THREAD_X * threads.y - 1) /
   //              (ELEMENTS_PER_THREAD_X * threads.y);
 
-  int grid_x = dimsB.x / threads.x / ELEMENTS_PER_THREAD_Y;
-  int grid_y = dimsA.y / threads.y / ELEMENTS_PER_THREAD_X;
+  int grid_x = (dimsB.x + threads.x * ELEMENTS_PER_THREAD_Y - 1) /
+               (threads.x * ELEMENTS_PER_THREAD_Y);
+  int grid_y = (dimsA.y + threads.y * ELEMENTS_PER_THREAD_X - 1) /
+               (threads.y * ELEMENTS_PER_THREAD_X);
 
   dim3 grid(grid_x, grid_y, 1);
 
@@ -362,7 +366,8 @@ int main(int argc, char **argv) {
          (int)((dimsA.y + ELEMENTS_PER_THREAD_X * block_size - 1) /
                (ELEMENTS_PER_THREAD_X * block_size)));
   printf("BLOCK SIZE: (%d, %d)\n", block_size, block_size);
-  printf("EACH THREAD WILL FETCH %d ROWS\n", ELEMENTS_PER_THREAD_X * block_size);
+  printf("EACH THREAD WILL FETCH %d ROWS\n",
+         ELEMENTS_PER_THREAD_X * block_size);
   printf("ALL BLOCKS IN Y : %d, X : %d\n",
          (int)((dimsA.y + ELEMENTS_PER_THREAD_X * block_size - 1) /
                (ELEMENTS_PER_THREAD_X * block_size)),
