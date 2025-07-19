@@ -55,11 +55,11 @@ __global__ void MatrixMulCUDA(float *C, float *A, float *B, int wA, int wB,
     }
 #pragma unroll
     for (int i = 0; i < ELEMENTS_PER_THREAD_Y; i++) {
-      const int row = b + (wB * ty);       
+      const int row = (b / wB) + ty; // phase / slice + thread row (threadX ->
+                                     // on Y axis , threadY -> on X axis)
       const int col = tx + i * BLOCK_SIZE;
       if (row < wB && col < wB) {
-        Bs[ty][col] =
-            B[b + (wB * ty) + col]; //  i * BLOCK_SIZE -> stride for blocks
+        Bs[ty][col] = B[row * wB + col];
       } else {
         Bs[ty][col] = 0.0f;
       }
