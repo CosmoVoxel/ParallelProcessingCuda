@@ -129,6 +129,18 @@ def run_performance_tests():
                       f"Size={perf_data['size_ops']} Ops, "
                       f"WorkgroupSize={perf_data['workgroup_size']} threads/block")
                 results.append(result)
+        else:
+            print(f"❌ {config_name} failed: {stderr.strip()}")
+            results.append({
+                'block_size': block_size,
+                'elements_per_thread_x': ept_x,
+                'elements_per_thread_y': ept_y,
+                'config_name': config_name,
+                'performance_gflops': -1,
+                'time_msec': -1,
+                'size_ops': -1,
+                'workgroup_size': -1
+            })
     
     return results
 
