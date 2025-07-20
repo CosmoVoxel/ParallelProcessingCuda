@@ -35,10 +35,12 @@ __global__ void MatrixMulCUDA(float *C, float *A, float *B, int wA, int wB,
 
   float Csub[total_elements] = {0.0f};
 
+
+  __shared__ float As[ELEMENTS_PER_THREAD_X * BLOCK_SIZE][BLOCK_SIZE];
+  __shared__ float Bs[BLOCK_SIZE][ELEMENTS_PER_THREAD_Y * BLOCK_SIZE];
+
   for (int a = aBegin, b = bBegin; a <= aEnd; a += aStep, b += bStep) {
 
-    __shared__ float As[ELEMENTS_PER_THREAD_X * BLOCK_SIZE][BLOCK_SIZE];
-    __shared__ float Bs[BLOCK_SIZE][ELEMENTS_PER_THREAD_Y * BLOCK_SIZE];
 
 #pragma unroll
     for (int i = 0; i < ELEMENTS_PER_THREAD_X; i++) {
@@ -291,16 +293,13 @@ int main(int argc, char **argv) {
     printf("      -wB=WidthB -hB=HeightB (Width x Height of Matrix B)\n");
     printf("  Note: Outer matrix dimensions of A & B matrices"
            " must be equal.\n");
-    printf("      -blocksize=n (n = 16 or 32, default is 16)\n");
-    printf(
-        "      -elements_per_thread=n (n = 1, 2, 4, 8, etc., default is 4)\n");
-
+    printf("-blocksize=n (n = 16 or 32, default is 16)\n");
     exit(EXIT_SUCCESS);
   }
 
   int dev = findCudaDevice(argc, (const char **)argv);
 
-  int block_size = 16;
+  int block_size = 32;
 
   if (checkCmdLineFlag(argc, (const char **)argv, "blocksize")) {
     block_size = getCmdLineArgumentInt(argc, (const char **)argv, "blocksize");
