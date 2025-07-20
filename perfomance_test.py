@@ -4,7 +4,6 @@ import json
 import re
 from pathlib import Path
 import itertools
-from tqdm import tqdm
 
 def compile_and_run(block_size=16, elements_per_thread_x=1, elements_per_thread_y=1, verify=False):
     """Compiles and runs CUDA program with specified parameters"""
@@ -95,7 +94,7 @@ def run_performance_tests():
         elements_per_thread_values
     ))
     
-    for block_size, ept_x, ept_y in tqdm(configurations, desc="Testing configurations"):
+    for block_size, ept_x, ept_y in configurations:
         config_name = f"Block={block_size:2d}, EPT_X={ept_x}, EPT_Y={ept_y}"
         
         stdout, stderr, returncode = compile_and_run(
