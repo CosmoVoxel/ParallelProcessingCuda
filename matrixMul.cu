@@ -35,12 +35,10 @@ __global__ void MatrixMulCUDA(float *C, float *A, float *B, int wA, int wB,
 
   float Csub[total_elements] = {0.0f};
 
-
   __shared__ float As[ELEMENTS_PER_THREAD_X * BLOCK_SIZE][BLOCK_SIZE];
   __shared__ float Bs[BLOCK_SIZE][ELEMENTS_PER_THREAD_Y * BLOCK_SIZE];
 
   for (int a = aBegin, b = bBegin; a <= aEnd; a += aStep, b += bStep) {
-
 
 #pragma unroll
     for (int i = 0; i < ELEMENTS_PER_THREAD_X; i++) {
@@ -294,12 +292,17 @@ int main(int argc, char **argv) {
     printf("  Note: Outer matrix dimensions of A & B matrices"
            " must be equal.\n");
     printf("-blocksize=n (n = 16 or 32, default is 16)\n");
+    printf("-elements_per_thread_x=n (n = 1 to 8, default is 6)\n");
+    printf("-elements_per_thread_y=n (n = 1 to 8, default is 6)\n");
+    
     exit(EXIT_SUCCESS);
   }
 
   int dev = findCudaDevice(argc, (const char **)argv);
 
   int block_size = 32;
+  int element_per_thread_x = ELEMENTS_PER_THREAD_X;
+  int element_per_thread_y = ELEMENTS_PER_THREAD_Y;
 
   if (checkCmdLineFlag(argc, (const char **)argv, "blocksize")) {
     block_size = getCmdLineArgumentInt(argc, (const char **)argv, "blocksize");
@@ -321,6 +324,26 @@ int main(int argc, char **argv) {
              elements_per_thread);
     }
   }
+
+  if (checkCmdLineFlag(argc, (const char **)argv, "elements_per_thread_x")) {
+    element_per_thread_x =
+        getCmdLineArgumentInt(argc, (const char **)argv, "elements_per_thread_x");
+    if (element_per_thread_x < 1 || element_per_thread_x > 8) {
+      printf("Error: elements per thread X must be between 1 and 8.\n");
+      exit(EXIT_FAILURE);
+    }
+  }
+
+  if (checkCmdLineFlag(argc, (const char **)argv, "elements_per_thread_y")) {
+    element_per_thread_y =
+        getCmdLineArgumentInt(argc, (const char **)argv, "elements_per_thread_y");
+    if (element_per_thread_y < 1 || element_per_thread_y > 8) {
+      printf("Error: elements per thread Y must be between 1 and 8.\n");
+      exit(EXIT_FAILURE);
+    }
+  }
+
+  
 
   int wA = 50 * block_size;
   int both = 50 * block_size;
