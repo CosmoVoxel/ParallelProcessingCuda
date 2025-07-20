@@ -24,14 +24,16 @@ def compile_and_run_with_nvprof(block_size=16, elements_per_thread_x=1, elements
         "-o", str(build_dir / "matrixMul"),
         "matrixMul.cu"
     ]
-    
+
+    file_name = 'matrixMul.exe' if os.name == 'nt' else 'matrixMul'
+
     # nvprof command with metrics
     nvprof_cmd = [
         "nvprof",
         "--metrics",
         "flop_count_sp,flop_sp_efficiency,achieved_occupancy,shared_load,registers_per_thread,shared_load_transactions,shared_store_transactions,dram_read_throughput,dram_write_throughput",
         "--csv",
-        str(build_dir / "matrixMul.exe"),
+        str(build_dir / file_name),
         f"-blocksize={block_size}",
         f"-elements_per_thread_x={elements_per_thread_x}",
         f"-elements_per_thread_y={elements_per_thread_y}"
