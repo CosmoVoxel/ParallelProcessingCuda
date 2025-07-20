@@ -24,14 +24,13 @@ def compile_and_run(block_size=16, elements_per_thread_x=1, elements_per_thread_
         "-o", str(build_dir / "matrixMul"),
         "matrixMul.cu"
     ]
-    
+        
     file_name = 'matrixMul.exe' if os.name == 'nt' else 'matrixMul'
     
     # Run command
     run_cmd = [
         str(build_dir / file_name),
-        "-blocksize", str(block_size),
-        
+        "-blocksize=" + str(block_size),
     ]
     
     try:
@@ -120,6 +119,11 @@ def run_performance_tests():
                     'config_name': config_name,
                     **perf_data
                 }
+                
+                print(f"✅ {config_name} → {perf_data['performance_gflops']} GFlop/s, "
+                      f"Time={perf_data['time_msec']} ms, "
+                      f"Size={perf_data['size_ops']} Ops, "
+                      f"WorkgroupSize={perf_data['workgroup_size']} threads/block")
                 results.append(result)
     
     return results
