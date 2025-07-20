@@ -12,7 +12,6 @@ def compile_and_run_with_nvprof(block_size=16, elements_per_thread_x=1, elements
     build_dir = Path("build")
     build_dir.mkdir(exist_ok=True)
     
-    # Compilation command
     compile_cmd = [
         "nvcc",
         "-std=c++17",
@@ -25,20 +24,21 @@ def compile_and_run_with_nvprof(block_size=16, elements_per_thread_x=1, elements
         "matrixMul.cu"
     ]
 
+    # Determine executable name based on OS
     file_name = 'matrixMul.exe' if os.name == 'nt' else 'matrixMul'
+
 
     # nvprof command with metrics
     nvprof_cmd = [
-        "ncu",
+        "nvprof",
         "--metrics",
         "flop_count_sp,flop_sp_efficiency,achieved_occupancy,shared_load,registers_per_thread,shared_load_transactions,shared_store_transactions,dram_read_throughput,dram_write_throughput",
         "--csv",
         str(build_dir / file_name),
-        f"-blocksize={block_size}",
-        f"-elements_per_thread_x={elements_per_thread_x}",
-        f"-elements_per_thread_y={elements_per_thread_y}"
     ]
-    
+
+    print(f"Running with command: {' '.join(nvprof_cmd)}")
+
     try:
         # Compilation
         compile_result = subprocess.run(
@@ -49,7 +49,6 @@ def compile_and_run_with_nvprof(block_size=16, elements_per_thread_x=1, elements
             cwd=Path.cwd()
         )
         
-        # Run with nvprof and save to partial_result.csv
         with open("partial_result.csv", "w", encoding='utf-8') as f:
             nvprof_result = subprocess.run(
                 nvprof_cmd,
