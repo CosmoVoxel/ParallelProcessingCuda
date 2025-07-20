@@ -31,6 +31,10 @@ def compile_and_run(block_size=16, elements_per_thread_x=1, elements_per_thread_
     run_cmd = [
         str(build_dir / file_name),
         "-blocksize=" + str(block_size),
+        "-wA=" + str(1600),
+        "-wB=" + str(1600),
+        "-hA=" + str(1600),
+        "-hB=" + str(1600),
     ]
     
     try:
