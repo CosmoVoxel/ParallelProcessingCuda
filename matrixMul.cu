@@ -35,36 +35,23 @@ __global__ void MatrixMulCUDA(float *C, float *A, float *B, int wA, int wB,
 
   float Csub[total_elements] = {0.0f};
 
+
+  __shared__ float As[ELEMENTS_PER_THREAD_X * BLOCK_SIZE][BLOCK_SIZE];
+  __shared__ float Bs[BLOCK_SIZE][ELEMENTS_PER_THREAD_Y * BLOCK_SIZE];
+
   for (int a = aBegin, b = bBegin; a <= aEnd; a += aStep, b += bStep) {
 
-    __shared__ float As[ELEMENTS_PER_THREAD_X * BLOCK_SIZE][BLOCK_SIZE];
-    __shared__ float Bs[BLOCK_SIZE][ELEMENTS_PER_THREAD_Y * BLOCK_SIZE];
 
-    // Bs[ty][tx] = B[b + wB * ty + tx];
-#pragma unroll // pragma unroll -- compiler directive to try to unroll the loop
+#pragma unroll
     for (int i = 0; i < ELEMENTS_PER_THREAD_X; i++) {
       int row = ty + i * BLOCK_SIZE;
-      int col = a + tx;
-      if (row < hA && col < wA) {
-        As[ty + i * BLOCK_SIZE][tx] =
-            A[a + wA * (ty + i * BLOCK_SIZE) +
-              tx]; //  i * BLOCK_SIZE -> stride for blocks
-      } else {
-        As[ty + i * BLOCK_SIZE][tx] = 0.0f;
-      }
+      int col = tx;
+      As[row][tx] = A[a + wA * row + col];
     }
 #pragma unroll
     for (int i = 0; i < ELEMENTS_PER_THREAD_Y; i++) {
-      const int row = b + (wB * ty);       
-      const int col = tx + i * BLOCK_SIZE;
-      if (row < wB && col < wB) {
-        Bs[ty][col] =
-            B[b + (wB * ty) + col]; //  i * BLOCK_SIZE -> stride for blocks
-      } else {
-        Bs[ty][col] = 0.0f;
-      }
-      // Bs[ty][col] = B[b + (wB * ty) + col]; //  i * BLOCK_SIZE -> stride for
-      // blocks
+      int col = tx + i * BLOCK_SIZE;
+      Bs[ty][col] = B[b + (wB * ty) + col];
     }
 
     __syncthreads();
@@ -96,6 +83,12 @@ __global__ void MatrixMulCUDA(float *C, float *A, float *B, int wA, int wB,
 void ConstantInit(float *data, int size, float val) {
   for (int i = 0; i < size; ++i) {
     data[i] = val;
+  }
+}
+
+void RandomInit(float *data, int size) {
+  for (int i = 0; i < size; ++i) {
+    data[i] = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
   }
 }
 
@@ -134,8 +127,8 @@ int MatrixMultiply(int argc, char **argv, int block_size, const dim3 &dimsA,
   checkCudaErrors(cudaMallocHost(&h_B, mem_size_B));
   cudaStream_t stream;
 
-  GradientInit(h_A, dimsA.x, dimsA.y);
-  ConstantInit(h_B, size_B, 1.0f);
+  RandomInit(h_A, size_A);
+  RandomInit(h_B, size_B);
 
   int min_dim = (dimsB.x < dimsB.y) ? dimsB.x : dimsB.y;
   for (int i = 0; i < min_dim; i++) {
@@ -171,10 +164,15 @@ int MatrixMultiply(int argc, char **argv, int block_size, const dim3 &dimsA,
 
   dim3 threads(block_size, block_size);
 
-  int grid_x = (dimsB.x + ELEMENTS_PER_THREAD_Y * threads.x - 1) /
-               (ELEMENTS_PER_THREAD_Y * threads.x);
-  int grid_y = (dimsA.y + ELEMENTS_PER_THREAD_X * threads.y - 1) /
-               (ELEMENTS_PER_THREAD_X * threads.y);
+  // int grid_x = (dimsB.x + ELEMENTS_PER_THREAD_Y * threads.x - 1) /
+  //              (ELEMENTS_PER_THREAD_Y * threads.x);
+  // int grid_y = (dimsA.y + ELEMENTS_PER_THREAD_X * threads.y - 1) /
+  //              (ELEMENTS_PER_THREAD_X * threads.y);
+
+  int grid_x = (dimsB.x + threads.x * ELEMENTS_PER_THREAD_Y - 1) /
+               (threads.x * ELEMENTS_PER_THREAD_Y);
+  int grid_y = (dimsA.y + threads.y * ELEMENTS_PER_THREAD_X - 1) /
+               (threads.y * ELEMENTS_PER_THREAD_X);
 
   dim3 grid(grid_x, grid_y, 1);
 
@@ -193,7 +191,7 @@ int MatrixMultiply(int argc, char **argv, int block_size, const dim3 &dimsA,
 
   checkCudaErrors(cudaEventRecord(start, stream));
 
-  int nIter = 1;
+  int nIter = 30;
 
   for (int j = 0; j < nIter; j++) {
     if (block_size == 16) {
@@ -241,6 +239,7 @@ int MatrixMultiply(int argc, char **argv, int block_size, const dim3 &dimsA,
   bool correct = true;
 
   double eps = 1.e-4;
+  int error_count = 0;
   for (int i = 0; i < dimsC.y; i++) {
     for (int j = 0; j < dimsC.x; j++) {
       float val = h_C[i * dimsC.x + j];
@@ -249,6 +248,7 @@ int MatrixMultiply(int argc, char **argv, int block_size, const dim3 &dimsA,
         if (fabs(ref) > eps) {
           printf("Error at (%d, %d): GPU result = %f, CPU result = %f\n", i, j,
                  val, ref);
+          error_count++;
           correct = false;
         }
       }
@@ -258,6 +258,9 @@ int MatrixMultiply(int argc, char **argv, int block_size, const dim3 &dimsA,
   }
 
   printf("%s\n", correct ? "Result = PASS" : "Result = FAIL");
+  if (error_count > 0) {
+    printf("Total errors: %d\n", error_count);
+  }
 
   checkCudaErrors(cudaFreeHost(h_A));
   checkCudaErrors(cudaFreeHost(h_B));
@@ -290,16 +293,13 @@ int main(int argc, char **argv) {
     printf("      -wB=WidthB -hB=HeightB (Width x Height of Matrix B)\n");
     printf("  Note: Outer matrix dimensions of A & B matrices"
            " must be equal.\n");
-    printf("      -blocksize=n (n = 16 or 32, default is 16)\n");
-    printf(
-        "      -elements_per_thread=n (n = 1, 2, 4, 8, etc., default is 4)\n");
-
+    printf("-blocksize=n (n = 16 or 32, default is 16)\n");
     exit(EXIT_SUCCESS);
   }
 
   int dev = findCudaDevice(argc, (const char **)argv);
 
-  int block_size = 16;
+  int block_size = 32;
 
   if (checkCmdLineFlag(argc, (const char **)argv, "blocksize")) {
     block_size = getCmdLineArgumentInt(argc, (const char **)argv, "blocksize");
@@ -358,13 +358,15 @@ int main(int argc, char **argv) {
   printf("MatrixA(%d,%d), MatrixB(%d,%d)\n", dimsA.x, dimsA.y, dimsB.x,
          dimsB.y);
 
-  printf("ELEMENTS PER THREAD: %d\n", ELEMENTS_PER_THREAD_X);
+  printf("X ELEMENTS PER THREAD: %d\n", ELEMENTS_PER_THREAD_X);
+  printf("Y ELEMENTS PER THREAD: %d\n", ELEMENTS_PER_THREAD_Y);
 
   printf("Grid SIZE: (%d, %d)\n", (int)(dimsB.x / block_size),
          (int)((dimsA.y + ELEMENTS_PER_THREAD_X * block_size - 1) /
                (ELEMENTS_PER_THREAD_X * block_size)));
   printf("BLOCK SIZE: (%d, %d)\n", block_size, block_size);
-  printf("EACH BLOCK PROCESS %d ROWS\n", ELEMENTS_PER_THREAD_X * block_size);
+  printf("EACH THREAD WILL FETCH %d ROWS\n",
+         ELEMENTS_PER_THREAD_X * block_size);
   printf("ALL BLOCKS IN Y : %d, X : %d\n",
          (int)((dimsA.y + ELEMENTS_PER_THREAD_X * block_size - 1) /
                (ELEMENTS_PER_THREAD_X * block_size)),
