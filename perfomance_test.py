@@ -1,3 +1,4 @@
+import os
 import subprocess
 import json
 import re
@@ -25,9 +26,11 @@ def compile_and_run(block_size=16, elements_per_thread_x=1, elements_per_thread_
         "matrixMul.cu"
     ]
     
+    file_name = 'matrixMul.exe' if os.name == 'nt' else 'matrixMul'
+    
     # Run command
     run_cmd = [
-        str(build_dir / "matrixMul.exe"),
+        str(build_dir / file_name),
         f"-blocksize={block_size}",
         f"-elements_per_thread_x={elements_per_thread_x}",
         f"-elements_per_thread_y={elements_per_thread_y}"
