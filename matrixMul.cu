@@ -10,10 +10,10 @@
 #include "helper_functions.h"
 
 #define ELEMENTS_PER_THREAD_X                                                  \
-  8 // Number of elements that each thread will process sequentially (in
+  6 // Number of elements that each thread will process sequentially (in
     // separate X Blocks)
 #define ELEMENTS_PER_THREAD_Y                                                  \
-  2 // Number of elements that each thread will process sequentially (in
+  6 // Number of elements that each thread will process sequentially (in
     // separate Y Blocks)
 
 template <int BLOCK_SIZE>
@@ -189,7 +189,7 @@ int MatrixMultiply(int argc, char **argv, int block_size, const dim3 &dimsA,
 
   checkCudaErrors(cudaEventRecord(start, stream));
 
-  int nIter = 1;
+  int nIter = 30;
 
   for (int j = 0; j < nIter; j++) {
     if (block_size == 16) {
@@ -300,7 +300,7 @@ int main(int argc, char **argv) {
 
   int dev = findCudaDevice(argc, (const char **)argv);
 
-  int block_size = 32;
+  int block_size = 16;
 
   if (checkCmdLineFlag(argc, (const char **)argv, "blocksize")) {
     block_size = getCmdLineArgumentInt(argc, (const char **)argv, "blocksize");
