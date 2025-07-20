@@ -8,13 +8,7 @@
 
 #include "helper_cuda.h"
 #include "helper_functions.h"
-
-#define ELEMENTS_PER_THREAD_X                                                  \
-  6 // Number of elements that each thread will process sequentially (in
-    // separate X Blocks)
-#define ELEMENTS_PER_THREAD_Y                                                  \
-  6 // Number of elements that each thread will process sequentially (in
-    // separate Y Blocks)
+#include "matrixMulConfig.h"
 
 template <int BLOCK_SIZE>
 __global__ void MatrixMulCUDA(float *C, float *A, float *B, int wA, int wB,
@@ -25,31 +19,29 @@ __global__ void MatrixMulCUDA(float *C, float *A, float *B, int wA, int wB,
   int tx = threadIdx.x;
   int ty = threadIdx.y;
 
-  int aBegin = wA * ELEMENTS_PER_THREAD_X * BLOCK_SIZE * by;
+  int aBegin = wA * elements_per_thread_x * BLOCK_SIZE * by;
   int aEnd = aBegin + wA - 1;
   int aStep = BLOCK_SIZE;
-  int bBegin = BLOCK_SIZE * bx * ELEMENTS_PER_THREAD_Y;
+  int bBegin = BLOCK_SIZE * bx * elements_per_thread_y;
   int bStep = BLOCK_SIZE * wB;
 
-  const int total_elements = ELEMENTS_PER_THREAD_X * ELEMENTS_PER_THREAD_Y;
+  const int total_elements = elements_per_thread_x * elements_per_thread_y;
 
   float Csub[total_elements] = {0.0f};
 
-
-  __shared__ float As[ELEMENTS_PER_THREAD_X * BLOCK_SIZE][BLOCK_SIZE];
-  __shared__ float Bs[BLOCK_SIZE][ELEMENTS_PER_THREAD_Y * BLOCK_SIZE];
+  __shared__ float As[elements_per_thread_x * BLOCK_SIZE][BLOCK_SIZE];
+  __shared__ float Bs[BLOCK_SIZE][elements_per_thread_y * BLOCK_SIZE];
 
   for (int a = aBegin, b = bBegin; a <= aEnd; a += aStep, b += bStep) {
 
-
 #pragma unroll
-    for (int i = 0; i < ELEMENTS_PER_THREAD_X; i++) {
+    for (int i = 0; i < elements_per_thread_x; i++) {
       int row = ty + i * BLOCK_SIZE;
       int col = tx;
       As[row][tx] = A[a + wA * row + col];
     }
 #pragma unroll
-    for (int i = 0; i < ELEMENTS_PER_THREAD_Y; i++) {
+    for (int i = 0; i < elements_per_thread_y; i++) {
       int col = tx + i * BLOCK_SIZE;
       Bs[ty][col] = B[b + (wB * ty) + col];
     }
@@ -58,9 +50,9 @@ __global__ void MatrixMulCUDA(float *C, float *A, float *B, int wA, int wB,
 
 #pragma unroll
     for (int k = 0; k < BLOCK_SIZE; ++k) {
-      for (int i = 0; i < ELEMENTS_PER_THREAD_X; i++) {
-        for (int j = 0; j < ELEMENTS_PER_THREAD_Y; j++) {
-          Csub[j + i * ELEMENTS_PER_THREAD_Y] +=
+      for (int i = 0; i < elements_per_thread_x; i++) {
+        for (int j = 0; j < elements_per_thread_y; j++) {
+          Csub[j + i * elements_per_thread_y] +=
               As[ty + i * BLOCK_SIZE][k] * Bs[k][tx + j * BLOCK_SIZE];
         }
       }
@@ -69,12 +61,12 @@ __global__ void MatrixMulCUDA(float *C, float *A, float *B, int wA, int wB,
     __syncthreads();
   }
 
-  for (int i = 0; i < ELEMENTS_PER_THREAD_X; i++) {
-    for (int j = 0; j < ELEMENTS_PER_THREAD_Y; j++) {
-      int row = (by * BLOCK_SIZE * ELEMENTS_PER_THREAD_X) + ty + i * BLOCK_SIZE;
-      int col = (bx * BLOCK_SIZE * ELEMENTS_PER_THREAD_Y) + tx + j * BLOCK_SIZE;
+  for (int i = 0; i < elements_per_thread_x; i++) {
+    for (int j = 0; j < elements_per_thread_y; j++) {
+      int row = (by * BLOCK_SIZE * elements_per_thread_x) + ty + i * BLOCK_SIZE;
+      int col = (bx * BLOCK_SIZE * elements_per_thread_y) + tx + j * BLOCK_SIZE;
       if (row < hA && col < wB) {
-        C[row * wB + col] = Csub[j + i * ELEMENTS_PER_THREAD_Y];
+        C[row * wB + col] = Csub[j + i * elements_per_thread_y];
       }
     }
   }
@@ -164,15 +156,15 @@ int MatrixMultiply(int argc, char **argv, int block_size, const dim3 &dimsA,
 
   dim3 threads(block_size, block_size);
 
-  // int grid_x = (dimsB.x + ELEMENTS_PER_THREAD_Y * threads.x - 1) /
-  //              (ELEMENTS_PER_THREAD_Y * threads.x);
-  // int grid_y = (dimsA.y + ELEMENTS_PER_THREAD_X * threads.y - 1) /
-  //              (ELEMENTS_PER_THREAD_X * threads.y);
+  // int grid_x = (dimsB.x + elements_per_thread_y * threads.x - 1) /
+  //              (elements_per_thread_y * threads.x);
+  // int grid_y = (dimsA.y + elements_per_thread_x * threads.y - 1) /
+  //              (elements_per_thread_x * threads.y);
 
-  int grid_x = (dimsB.x + threads.x * ELEMENTS_PER_THREAD_Y - 1) /
-               (threads.x * ELEMENTS_PER_THREAD_Y);
-  int grid_y = (dimsA.y + threads.y * ELEMENTS_PER_THREAD_X - 1) /
-               (threads.y * ELEMENTS_PER_THREAD_X);
+  int grid_x = (dimsB.x + threads.x * elements_per_thread_y - 1) /
+               (threads.x * elements_per_thread_y);
+  int grid_y = (dimsA.y + threads.y * elements_per_thread_x - 1) /
+               (threads.y * elements_per_thread_x);
 
   dim3 grid(grid_x, grid_y, 1);
 
@@ -224,42 +216,42 @@ int MatrixMultiply(int argc, char **argv, int block_size, const dim3 &dimsA,
       cudaMemcpyAsync(h_C, d_C, mem_size_C, cudaMemcpyDeviceToHost, stream));
   checkCudaErrors(cudaStreamSynchronize(stream));
 
-  printf("Checking computed result for correctness: ");
-
-  printf("Running CPU reference...\n");
-  float *h_C_ref;
-  checkCudaErrors(cudaMallocHost(&h_C_ref, mem_size_C));
-  if (h_C_ref == NULL) {
-    fprintf(stderr, "Failed to allocate host matrix C reference!\n");
-    exit(EXIT_FAILURE);
-  }
-  MatrixMultiplyCPU(h_C_ref, h_A, h_B, dimsA.y, dimsA.x, dimsB.x);
-  printf("done\n");
-  printf("Comparing results...\n");
   bool correct = true;
-
-  double eps = 1.e-4;
-  int error_count = 0;
-  for (int i = 0; i < dimsC.y; i++) {
-    for (int j = 0; j < dimsC.x; j++) {
-      float val = h_C[i * dimsC.x + j];
-      float ref = h_C_ref[i * dimsC.x + j];
-      if (fabs(val - ref) > eps * fabs(ref)) {
-        if (fabs(ref) > eps) {
-          printf("Error at (%d, %d): GPU result = %f, CPU result = %f\n", i, j,
-                 val, ref);
-          error_count++;
-          correct = false;
+  if (verify) {
+    printf("Checking computed result for correctness: ");
+    printf("Running CPU reference...\n");
+    float *h_C_ref;
+    checkCudaErrors(cudaMallocHost(&h_C_ref, mem_size_C));
+    if (h_C_ref == NULL) {
+      fprintf(stderr, "Failed to allocate host matrix C reference!\n");
+      exit(EXIT_FAILURE);
+    }
+    MatrixMultiplyCPU(h_C_ref, h_A, h_B, dimsA.y, dimsA.x, dimsB.x);
+    printf("done\n");
+    printf("Comparing results...\n");
+    double eps = 1.e-4;
+    int error_count = 0;
+    for (int i = 0; i < dimsC.y; i++) {
+      for (int j = 0; j < dimsC.x; j++) {
+        float val = h_C[i * dimsC.x + j];
+        float ref = h_C_ref[i * dimsC.x + j];
+        if (fabs(val - ref) > eps * fabs(ref)) {
+          if (fabs(ref) > eps) {
+            printf("Error at (%d, %d): GPU result = %f, CPU result = %f\n", i,
+                   j, val, ref);
+            error_count++;
+            correct = false;
+          }
         }
       }
+      if (!correct)
+        break;
     }
-    if (!correct)
-      break;
-  }
 
-  printf("%s\n", correct ? "Result = PASS" : "Result = FAIL");
-  if (error_count > 0) {
-    printf("Total errors: %d\n", error_count);
+    printf("%s\n", correct ? "Result = PASS" : "Result = FAIL");
+    if (error_count > 0) {
+      printf("Total errors: %d\n", error_count);
+    }
   }
 
   checkCudaErrors(cudaFreeHost(h_A));
@@ -300,7 +292,7 @@ int main(int argc, char **argv) {
   int dev = findCudaDevice(argc, (const char **)argv);
 
   int block_size = 32;
-
+  
   if (checkCmdLineFlag(argc, (const char **)argv, "blocksize")) {
     block_size = getCmdLineArgumentInt(argc, (const char **)argv, "blocksize");
     if (block_size != 16 && block_size != 32) {
@@ -316,8 +308,8 @@ int main(int argc, char **argv) {
       printf("Error: elements per thread must be between 1 and 8.\n");
       exit(EXIT_FAILURE);
     }
-    if (elements_per_thread != ELEMENTS_PER_THREAD_X) {
-      printf("Warning: changing ELEMENTS_PER_THREAD_X to %d.\n",
+    if (elements_per_thread != elements_per_thread_x) {
+      printf("Warning: changing elements_per_thread_x to %d.\n",
              elements_per_thread);
     }
   }
@@ -358,21 +350,21 @@ int main(int argc, char **argv) {
   printf("MatrixA(%d,%d), MatrixB(%d,%d)\n", dimsA.x, dimsA.y, dimsB.x,
          dimsB.y);
 
-  printf("X ELEMENTS PER THREAD: %d\n", ELEMENTS_PER_THREAD_X);
-  printf("Y ELEMENTS PER THREAD: %d\n", ELEMENTS_PER_THREAD_Y);
+  printf("X ELEMENTS PER THREAD: %d\n", elements_per_thread_x);
+  printf("Y ELEMENTS PER THREAD: %d\n", elements_per_thread_y);
 
   printf("Grid SIZE: (%d, %d)\n", (int)(dimsB.x / block_size),
-         (int)((dimsA.y + ELEMENTS_PER_THREAD_X * block_size - 1) /
-               (ELEMENTS_PER_THREAD_X * block_size)));
+         (int)((dimsA.y + elements_per_thread_x * block_size - 1) /
+               (elements_per_thread_x * block_size)));
   printf("BLOCK SIZE: (%d, %d)\n", block_size, block_size);
   printf("EACH THREAD WILL FETCH %d ROWS\n",
-         ELEMENTS_PER_THREAD_X * block_size);
+         elements_per_thread_x * block_size);
   printf("ALL BLOCKS IN Y : %d, X : %d\n",
-         (int)((dimsA.y + ELEMENTS_PER_THREAD_X * block_size - 1) /
-               (ELEMENTS_PER_THREAD_X * block_size)),
-         (int)((dimsA.y + ELEMENTS_PER_THREAD_X * block_size - 1) /
-               (ELEMENTS_PER_THREAD_X * block_size)) *
-             ELEMENTS_PER_THREAD_X * block_size);
+         (int)((dimsA.y + elements_per_thread_x * block_size - 1) /
+               (elements_per_thread_x * block_size)),
+         (int)((dimsA.y + elements_per_thread_x * block_size - 1) /
+               (elements_per_thread_x * block_size)) *
+             elements_per_thread_x * block_size);
 
   checkCudaErrors(cudaProfilerStart());
   int matrix_result = MatrixMultiply(argc, argv, block_size, dimsA, dimsB);
