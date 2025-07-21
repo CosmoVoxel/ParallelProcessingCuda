@@ -1,4 +1,3 @@
-#include <__clang_cuda_builtin_vars.h>
 #include <assert.h>
 #include <cmath>
 #include <cstdio>
@@ -8,7 +7,6 @@
 #include <cuda_runtime.h>
 
 #include "helper_cuda.h"
-#include "helper_functions.h"
 #include "matrixMulConfig.h"
 
 __global__ void MatrixMulCUDA(float *C, float *A, float *B, int wA, int wB,
@@ -173,11 +171,9 @@ int MatrixMultiply(int argc, char **argv, int block_size, const dim3 &dimsA,
 
   checkCudaErrors(cudaEventRecord(start, stream));
 
-  int nIter = 30;
+  int nIter = 100;
 
   for (int j = 0; j < nIter; j++) {
-      MatrixMulCUDA<<<grid, threads, 0, stream>>>(d_C, d_A, d_B, dimsA.x,
-                                                      dimsB.x, dimsA.y);
       MatrixMulCUDA<<<grid, threads, 0, stream>>>(d_C, d_A, d_B, dimsA.x,
                                                       dimsB.x, dimsA.y);
   }

@@ -1,0 +1,509 @@
+{
+  "metadata": {
+    "total_configurations": 50,
+    "test_date": "1753100128.5188847",
+    "cuda_program": "matrixMul.cu"
+  },
+  "results": [
+    {
+      "block_size": 16,
+      "elements_per_thread_x": 1,
+      "elements_per_thread_y": 1,
+      "config_name": "Block=16, EPT_X=1, EPT_Y=1",
+      "performance_gflops": 1430.07,
+      "time_msec": 5.728,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 256
+    },
+    {
+      "block_size": 16,
+      "elements_per_thread_x": 1,
+      "elements_per_thread_y": 2,
+      "config_name": "Block=16, EPT_X=1, EPT_Y=2",
+      "performance_gflops": 1649.92,
+      "time_msec": 4.965,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 256
+    },
+    {
+      "block_size": 16,
+      "elements_per_thread_x": 1,
+      "elements_per_thread_y": 4,
+      "config_name": "Block=16, EPT_X=1, EPT_Y=4",
+      "performance_gflops": 1694.79,
+      "time_msec": 4.834,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 256
+    },
+    {
+      "block_size": 16,
+      "elements_per_thread_x": 1,
+      "elements_per_thread_y": 6,
+      "config_name": "Block=16, EPT_X=1, EPT_Y=6",
+      "performance_gflops": 1608.67,
+      "time_msec": 5.092,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 256
+    },
+    {
+      "block_size": 16,
+      "elements_per_thread_x": 1,
+      "elements_per_thread_y": 8,
+      "config_name": "Block=16, EPT_X=1, EPT_Y=8",
+      "performance_gflops": 1689.21,
+      "time_msec": 4.85,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 256
+    },
+    {
+      "block_size": 16,
+      "elements_per_thread_x": 2,
+      "elements_per_thread_y": 1,
+      "config_name": "Block=16, EPT_X=2, EPT_Y=1",
+      "performance_gflops": 1957.45,
+      "time_msec": 4.185,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 256
+    },
+    {
+      "block_size": 16,
+      "elements_per_thread_x": 2,
+      "elements_per_thread_y": 2,
+      "config_name": "Block=16, EPT_X=2, EPT_Y=2",
+      "performance_gflops": 2632.07,
+      "time_msec": 3.112,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 256
+    },
+    {
+      "block_size": 16,
+      "elements_per_thread_x": 2,
+      "elements_per_thread_y": 4,
+      "config_name": "Block=16, EPT_X=2, EPT_Y=4",
+      "performance_gflops": 2815.16,
+      "time_msec": 2.91,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 256
+    },
+    {
+      "block_size": 16,
+      "elements_per_thread_x": 2,
+      "elements_per_thread_y": 6,
+      "config_name": "Block=16, EPT_X=2, EPT_Y=6",
+      "performance_gflops": 3052.11,
+      "time_msec": 2.684,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 256
+    },
+    {
+      "block_size": 16,
+      "elements_per_thread_x": 2,
+      "elements_per_thread_y": 8,
+      "config_name": "Block=16, EPT_X=2, EPT_Y=8",
+      "performance_gflops": 3005.73,
+      "time_msec": 2.725,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 256
+    },
+    {
+      "block_size": 16,
+      "elements_per_thread_x": 4,
+      "elements_per_thread_y": 1,
+      "config_name": "Block=16, EPT_X=4, EPT_Y=1",
+      "performance_gflops": 3139.4,
+      "time_msec": 2.609,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 256
+    },
+    {
+      "block_size": 16,
+      "elements_per_thread_x": 4,
+      "elements_per_thread_y": 2,
+      "config_name": "Block=16, EPT_X=4, EPT_Y=2",
+      "performance_gflops": 3872.7,
+      "time_msec": 2.115,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 256
+    },
+    {
+      "block_size": 16,
+      "elements_per_thread_x": 4,
+      "elements_per_thread_y": 4,
+      "config_name": "Block=16, EPT_X=4, EPT_Y=4",
+      "performance_gflops": 4603.39,
+      "time_msec": 1.78,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 256
+    },
+    {
+      "block_size": 16,
+      "elements_per_thread_x": 4,
+      "elements_per_thread_y": 6,
+      "config_name": "Block=16, EPT_X=4, EPT_Y=6",
+      "performance_gflops": 4949.76,
+      "time_msec": 1.655,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 256
+    },
+    {
+      "block_size": 16,
+      "elements_per_thread_x": 4,
+      "elements_per_thread_y": 8,
+      "config_name": "Block=16, EPT_X=4, EPT_Y=8",
+      "performance_gflops": 4958.75,
+      "time_msec": 1.652,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 256
+    },
+    {
+      "block_size": 16,
+      "elements_per_thread_x": 6,
+      "elements_per_thread_y": 1,
+      "config_name": "Block=16, EPT_X=6, EPT_Y=1",
+      "performance_gflops": 3039.04,
+      "time_msec": 2.696,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 256
+    },
+    {
+      "block_size": 16,
+      "elements_per_thread_x": 6,
+      "elements_per_thread_y": 2,
+      "config_name": "Block=16, EPT_X=6, EPT_Y=2",
+      "performance_gflops": 4397.78,
+      "time_msec": 1.863,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 256
+    },
+    {
+      "block_size": 16,
+      "elements_per_thread_x": 6,
+      "elements_per_thread_y": 4,
+      "config_name": "Block=16, EPT_X=6, EPT_Y=4",
+      "performance_gflops": 4003.72,
+      "time_msec": 2.046,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 256
+    },
+    {
+      "block_size": 16,
+      "elements_per_thread_x": 6,
+      "elements_per_thread_y": 6,
+      "config_name": "Block=16, EPT_X=6, EPT_Y=6",
+      "performance_gflops": 5757.88,
+      "time_msec": 1.423,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 256
+    },
+    {
+      "block_size": 16,
+      "elements_per_thread_x": 6,
+      "elements_per_thread_y": 8,
+      "config_name": "Block=16, EPT_X=6, EPT_Y=8",
+      "performance_gflops": 6029.95,
+      "time_msec": 1.359,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 256
+    },
+    {
+      "block_size": 16,
+      "elements_per_thread_x": 8,
+      "elements_per_thread_y": 1,
+      "config_name": "Block=16, EPT_X=8, EPT_Y=1",
+      "performance_gflops": 3475.24,
+      "time_msec": 2.357,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 256
+    },
+    {
+      "block_size": 16,
+      "elements_per_thread_x": 8,
+      "elements_per_thread_y": 2,
+      "config_name": "Block=16, EPT_X=8, EPT_Y=2",
+      "performance_gflops": 5139.64,
+      "time_msec": 1.594,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 256
+    },
+    {
+      "block_size": 16,
+      "elements_per_thread_x": 8,
+      "elements_per_thread_y": 4,
+      "config_name": "Block=16, EPT_X=8, EPT_Y=4",
+      "performance_gflops": 6721.73,
+      "time_msec": 1.219,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 256
+    },
+    {
+      "block_size": 16,
+      "elements_per_thread_x": 8,
+      "elements_per_thread_y": 6,
+      "config_name": "Block=16, EPT_X=8, EPT_Y=6",
+      "performance_gflops": 6830.25,
+      "time_msec": 1.199,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 256
+    },
+    {
+      "block_size": 16,
+      "elements_per_thread_x": 8,
+      "elements_per_thread_y": 8,
+      "config_name": "Block=16, EPT_X=8, EPT_Y=8",
+      "performance_gflops": 6470.03,
+      "time_msec": 1.266,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 256
+    },
+    {
+      "block_size": 32,
+      "elements_per_thread_x": 1,
+      "elements_per_thread_y": 1,
+      "config_name": "Block=32, EPT_X=1, EPT_Y=1",
+      "performance_gflops": 1256.4,
+      "time_msec": 6.52,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 1024
+    },
+    {
+      "block_size": 32,
+      "elements_per_thread_x": 1,
+      "elements_per_thread_y": 2,
+      "config_name": "Block=32, EPT_X=1, EPT_Y=2",
+      "performance_gflops": 1575.58,
+      "time_msec": 5.199,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 1024
+    },
+    {
+      "block_size": 32,
+      "elements_per_thread_x": 1,
+      "elements_per_thread_y": 4,
+      "config_name": "Block=32, EPT_X=1, EPT_Y=4",
+      "performance_gflops": 1712.38,
+      "time_msec": 4.784,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 1024
+    },
+    {
+      "block_size": 32,
+      "elements_per_thread_x": 1,
+      "elements_per_thread_y": 6,
+      "config_name": "Block=32, EPT_X=1, EPT_Y=6",
+      "performance_gflops": 1774.43,
+      "time_msec": 4.617,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 1024
+    },
+    {
+      "block_size": 32,
+      "elements_per_thread_x": 1,
+      "elements_per_thread_y": 8,
+      "config_name": "Block=32, EPT_X=1, EPT_Y=8",
+      "performance_gflops": 1657.08,
+      "time_msec": 4.944,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 1024
+    },
+    {
+      "block_size": 32,
+      "elements_per_thread_x": 2,
+      "elements_per_thread_y": 1,
+      "config_name": "Block=32, EPT_X=2, EPT_Y=1",
+      "performance_gflops": 2172.43,
+      "time_msec": 3.771,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 1024
+    },
+    {
+      "block_size": 32,
+      "elements_per_thread_x": 2,
+      "elements_per_thread_y": 2,
+      "config_name": "Block=32, EPT_X=2, EPT_Y=2",
+      "performance_gflops": 2677.4,
+      "time_msec": 3.06,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 1024
+    },
+    {
+      "block_size": 32,
+      "elements_per_thread_x": 2,
+      "elements_per_thread_y": 4,
+      "config_name": "Block=32, EPT_X=2, EPT_Y=4",
+      "performance_gflops": 2937.16,
+      "time_msec": 2.789,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 1024
+    },
+    {
+      "block_size": 32,
+      "elements_per_thread_x": 2,
+      "elements_per_thread_y": 6,
+      "config_name": "Block=32, EPT_X=2, EPT_Y=6",
+      "performance_gflops": 2461.78,
+      "time_msec": 3.328,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 1024
+    },
+    {
+      "block_size": 32,
+      "elements_per_thread_x": 2,
+      "elements_per_thread_y": 8,
+      "config_name": "Block=32, EPT_X=2, EPT_Y=8",
+      "performance_gflops": 2864.8,
+      "time_msec": 2.86,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 1024
+    },
+    {
+      "block_size": 32,
+      "elements_per_thread_x": 4,
+      "elements_per_thread_y": 1,
+      "config_name": "Block=32, EPT_X=4, EPT_Y=1",
+      "performance_gflops": 2833.92,
+      "time_msec": 2.891,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 1024
+    },
+    {
+      "block_size": 32,
+      "elements_per_thread_x": 4,
+      "elements_per_thread_y": 2,
+      "config_name": "Block=32, EPT_X=4, EPT_Y=2",
+      "performance_gflops": 4172.99,
+      "time_msec": 1.963,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 1024
+    },
+    {
+      "block_size": 32,
+      "elements_per_thread_x": 4,
+      "elements_per_thread_y": 4,
+      "config_name": "Block=32, EPT_X=4, EPT_Y=4",
+      "performance_gflops": 4710.37,
+      "time_msec": 1.739,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 1024
+    },
+    {
+      "block_size": 32,
+      "elements_per_thread_x": 4,
+      "elements_per_thread_y": 6,
+      "config_name": "Block=32, EPT_X=4, EPT_Y=6",
+      "performance_gflops": 3991.74,
+      "time_msec": 2.052,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 1024
+    },
+    {
+      "block_size": 32,
+      "elements_per_thread_x": 4,
+      "elements_per_thread_y": 8,
+      "config_name": "Block=32, EPT_X=4, EPT_Y=8",
+      "performance_gflops": -1,
+      "time_msec": -1,
+      "size_ops": -1,
+      "workgroup_size": -1
+    },
+    {
+      "block_size": 32,
+      "elements_per_thread_x": 6,
+      "elements_per_thread_y": 1,
+      "config_name": "Block=32, EPT_X=6, EPT_Y=1",
+      "performance_gflops": 3344.23,
+      "time_msec": 2.45,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 1024
+    },
+    {
+      "block_size": 32,
+      "elements_per_thread_x": 6,
+      "elements_per_thread_y": 2,
+      "config_name": "Block=32, EPT_X=6, EPT_Y=2",
+      "performance_gflops": 5150.42,
+      "time_msec": 1.591,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 1024
+    },
+    {
+      "block_size": 32,
+      "elements_per_thread_x": 6,
+      "elements_per_thread_y": 4,
+      "config_name": "Block=32, EPT_X=6, EPT_Y=4",
+      "performance_gflops": 4815.16,
+      "time_msec": 1.701,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 1024
+    },
+    {
+      "block_size": 32,
+      "elements_per_thread_x": 6,
+      "elements_per_thread_y": 6,
+      "config_name": "Block=32, EPT_X=6, EPT_Y=6",
+      "performance_gflops": -1,
+      "time_msec": -1,
+      "size_ops": -1,
+      "workgroup_size": -1
+    },
+    {
+      "block_size": 32,
+      "elements_per_thread_x": 6,
+      "elements_per_thread_y": 8,
+      "config_name": "Block=32, EPT_X=6, EPT_Y=8",
+      "performance_gflops": -1,
+      "time_msec": -1,
+      "size_ops": -1,
+      "workgroup_size": -1
+    },
+    {
+      "block_size": 32,
+      "elements_per_thread_x": 8,
+      "elements_per_thread_y": 1,
+      "config_name": "Block=32, EPT_X=8, EPT_Y=1",
+      "performance_gflops": 3325.55,
+      "time_msec": 2.463,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 1024
+    },
+    {
+      "block_size": 32,
+      "elements_per_thread_x": 8,
+      "elements_per_thread_y": 2,
+      "config_name": "Block=32, EPT_X=8, EPT_Y=2",
+      "performance_gflops": 4985.85,
+      "time_msec": 1.643,
+      "size_ops": 8192000000.0,
+      "workgroup_size": 1024
+    },
+    {
+      "block_size": 32,
+      "elements_per_thread_x": 8,
+      "elements_per_thread_y": 4,
+      "config_name": "Block=32, EPT_X=8, EPT_Y=4",
+      "performance_gflops": -1,
+      "time_msec": -1,
+      "size_ops": -1,
+      "workgroup_size": -1
+    },
+    {
+      "block_size": 32,
+      "elements_per_thread_x": 8,
+      "elements_per_thread_y": 6,
+      "config_name": "Block=32, EPT_X=8, EPT_Y=6",
+      "performance_gflops": -1,
+      "time_msec": -1,
+      "size_ops": -1,
+      "workgroup_size": -1
+    },
+    {
+      "block_size": 32,
+      "elements_per_thread_x": 8,
+      "elements_per_thread_y": 8,
+      "config_name": "Block=32, EPT_X=8, EPT_Y=8",
+      "performance_gflops": -1,
+      "time_msec": -1,
+      "size_ops": -1,
+      "workgroup_size": -1
+    }
+  ]
+}

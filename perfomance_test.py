@@ -109,10 +109,21 @@ def run_performance_tests():
         if returncode == 0:
             perf_data = parse_performance_output(stdout)
             if perf_data:
-                # Validate performance - if > 10000 GFlop/s, likely an error
                 if perf_data['performance_gflops'] > 10000:
-                    perf_data['performance_gflops'] = -1
-                    
+                    # Move to next else statement if performance is too high
+                    print(f"❌ {config_name} failed: {stderr.strip()}") 
+                    results.append({
+                        'block_size': block_size,
+                        'elements_per_thread_x': ept_x,
+                        'elements_per_thread_y': ept_y,
+                        'config_name': config_name,
+                        'performance_gflops': -1,
+                        'time_msec': -1,
+                        'size_ops': -1,
+                        'workgroup_size': -1
+                    })
+                    continue
+
                 result = {
                     'block_size': block_size,
                     'elements_per_thread_x': ept_x,
