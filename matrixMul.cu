@@ -169,8 +169,6 @@ int MatrixMultiply(int argc, char **argv, int block_size, const dim3 &dimsA,
 
   checkCudaErrors(cudaEventRecord(start, stream));
 
-  int nIter = 100;
-
   for (int j = 0; j < nIter; j++) {
       MatrixMulCUDA<<<grid, threads, 0, stream>>>(d_C, d_A, d_B, dimsA.x,
                                                       dimsB.x, dimsA.y);

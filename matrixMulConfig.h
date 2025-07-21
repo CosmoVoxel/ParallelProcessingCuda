@@ -17,7 +17,12 @@
 #define BLOCK_SIZE 16
 #endif
 
+#ifndef NITER
+#define NITER 100
+#endif
+
 constexpr int elements_per_thread_x = ELEMENTS_PER_THREAD_X;
 constexpr int elements_per_thread_y = ELEMENTS_PER_THREAD_Y;
 constexpr bool verify = VERIFY;
 constexpr int block_size = BLOCK_SIZE;
+constexpr int nIter = NITER;
