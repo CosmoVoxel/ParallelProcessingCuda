@@ -13,6 +13,11 @@
 #define VERIFY false
 #endif
 
+#ifndef BLOCK_SIZE
+#define BLOCK_SIZE 16
+#endif
+
 constexpr int elements_per_thread_x = ELEMENTS_PER_THREAD_X;
 constexpr int elements_per_thread_y = ELEMENTS_PER_THREAD_Y;
 constexpr bool verify = VERIFY;
+constexpr int block_size = BLOCK_SIZE;

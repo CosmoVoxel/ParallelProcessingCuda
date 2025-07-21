@@ -15,12 +15,10 @@ def compile_and_run(block_size=16, elements_per_thread_x=1, elements_per_thread_
     # Compilation command
     compile_cmd = [
         "nvcc",
-        "-std=c++17",
-        "-O3",
-        "--use_fast_math",
         f"-DELEMENTS_PER_THREAD_X={elements_per_thread_x}",
         f"-DELEMENTS_PER_THREAD_Y={elements_per_thread_y}",
         f"-DVERIFY={'true' if verify else 'false'}",
+        f"-DBLOCK_SIZE={block_size}",
         "-o", str(build_dir / "matrixMul"),
         "matrixMul.cu"
     ]
@@ -30,7 +28,6 @@ def compile_and_run(block_size=16, elements_per_thread_x=1, elements_per_thread_
     # Run command
     run_cmd = [
         str(build_dir / file_name),
-        "-blocksize=" + str(block_size),
         "-wA=" + str(1600),
         "-wB=" + str(1600),
         "-hA=" + str(1600),
