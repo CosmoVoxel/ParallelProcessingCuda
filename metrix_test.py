@@ -29,23 +29,22 @@ def compile_and_run_with_nvprof(block_size=16, elements_per_thread_x=1, elements
 
     # Determine executable name based on OS
     file_name = 'matrixMul.exe' if os.name == 'nt' else 'matrixMul'
+    
+    # Result filename with parameters
+    result_filename = f"elements_per_thread_x_{elements_per_thread_x}_elements_per_thread_y_{elements_per_thread_y}_block_size_{block_size}.csv"
+    result_path = results_dir / result_filename
+
 
     # nvprof command with metrics - EXACTLY as you specified!
     nvprof_cmd = [
         "nvprof",
         "--metrics",
         "flop_count_sp,flop_sp_efficiency,achieved_occupancy,shared_load,registers_per_thread,shared_load_transactions,shared_store_transactions,dram_read_throughput,dram_write_throughput",
+        "--log-file",
+        result_path,        
         "--csv",
         str(build_dir / file_name),
-    ]
-
-    # Result filename with parameters
-    result_filename = f"elements_per_thread_x_{elements_per_thread_x}_elements_per_thread_y_{elements_per_thread_y}_block_size_{block_size}.csv"
-    result_path = results_dir / result_filename
-
-    nvprof_cmd.append("$>")
-    nvprof_cmd.append(str(result_path))
-    
+    ]    
     print(f"Running with command: {' '.join(nvprof_cmd)}")
 
     try:
