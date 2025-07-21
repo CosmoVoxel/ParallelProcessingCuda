@@ -42,7 +42,3 @@ Makefile
 *.bak
 *.tmp
 .clangd
-
-# json AND csv  
-*.json
-*.csv
