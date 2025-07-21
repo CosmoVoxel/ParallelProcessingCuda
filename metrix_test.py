@@ -37,12 +37,16 @@ def compile_and_run_with_nvprof(block_size=16, elements_per_thread_x=1, elements
         "flop_count_sp,flop_sp_efficiency,achieved_occupancy,shared_load,registers_per_thread,shared_load_transactions,shared_store_transactions,dram_read_throughput,dram_write_throughput",
         "--csv",
         str(build_dir / file_name),
-        "-blocksize", str(block_size),
     ]
 
     # Result filename with parameters
     result_filename = f"elements_per_thread_x_{elements_per_thread_x}_elements_per_thread_y_{elements_per_thread_y}_block_size_{block_size}.csv"
     result_path = results_dir / result_filename
+
+    nvprof_cmd.append(
+        "$>",
+        result_path
+    )
 
     print(f"Running with command: {' '.join(nvprof_cmd)}")
 
@@ -60,11 +64,9 @@ def compile_and_run_with_nvprof(block_size=16, elements_per_thread_x=1, elements
         
         print(f"📊 Running nvprof and saving to {result_filename}")
         
-        # Run nvprof and save directly to named file
-        with open(result_path, "w", encoding='utf-8') as f:
-            nvprof_result = subprocess.run(
+        
+        nvprof_result = subprocess.run(
                 nvprof_cmd,
-                stdout=f,
                 stderr=subprocess.PIPE,
                 text=True,
                 check=True,
@@ -94,7 +96,7 @@ def main():
     
     # Test configurations
     block_sizes = [16, 32]
-    elements_per_thread_values = [1, 2, 4, 6, 8]
+    elements_per_thread_values = [1, 2, 4]
     
     configurations = list(itertools.product(
         block_sizes,
