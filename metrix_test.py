@@ -46,6 +46,10 @@ def compile_and_run_with_nvprof(block_size=16, elements_per_thread_x=1, elements
         str(result_path),        
         "--csv",
         str(build_dir / file_name),
+        "-wA=" + str(1600),
+        "-wB=" + str(1600),
+        "-hA=" + str(1600),
+        "-hB=" + str(1600),
     ]    
     print(f"Running with command: {' '.join(nvprof_cmd)}")
 
