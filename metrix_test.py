@@ -2,6 +2,7 @@ import subprocess
 import os
 from pathlib import Path
 import itertools
+import re
 
 def compile_and_run_with_nvprof(block_size=16, elements_per_thread_x=1, elements_per_thread_y=1, verify=False):
     """Compiles and runs CUDA program with nvprof metrics"""
@@ -60,8 +61,6 @@ def compile_and_run_with_nvprof(block_size=16, elements_per_thread_x=1, elements
         )
         
         print(f"📊 Running nvprof and saving to {result_filename}")
-        
-        
         nvprof_result = subprocess.run(
                 nvprof_cmd,
                 stderr=subprocess.PIPE,
@@ -71,6 +70,20 @@ def compile_and_run_with_nvprof(block_size=16, elements_per_thread_x=1, elements
                 cwd=Path.cwd()
             )
         
+        pattern = r"== Metric result:\n([\s\S]*)"
+        # Open result file and check for the pattern
+        with open(result_path, 'r') as file:
+            content = file.read()
+            match = re.search(pattern, content)
+            if match:
+                print("✅ Metrics found in result file")
+                metrics_data = match.group(1).strip()
+                # Save the metrics data to the CSV file
+                with open(result_path, 'w') as result_file:
+                    result_file.write(metrics_data)
+            else:
+                print("⚠️ No metrics found in result file")
+
         print(f"✅ Saved: {result_filename}")
         return True
         
