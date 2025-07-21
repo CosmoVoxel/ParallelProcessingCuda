@@ -22,6 +22,7 @@ def compile_and_run_with_nvprof(block_size=16, elements_per_thread_x=1, elements
         f"-DELEMENTS_PER_THREAD_X={elements_per_thread_x}",
         f"-DELEMENTS_PER_THREAD_Y={elements_per_thread_y}",
         f"-DVERIFY={'true' if verify else 'false'}",
+        f"-DBLOCK_SIZE={block_size}",
         "-o", str(build_dir / "matrixMul"),
         "matrixMul.cu"
     ]
