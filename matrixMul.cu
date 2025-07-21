@@ -154,10 +154,8 @@ int MatrixMultiply(int argc, char **argv, int block_size, const dim3 &dimsA,
 
   dim3 threads(block_size, block_size);
 
-  int grid_x = (dimsB.x + threads.x * elements_per_thread_y - 1) /
-               (threads.x * elements_per_thread_y);
-  int grid_y = (dimsA.y + threads.y * elements_per_thread_x - 1) /
-               (threads.y * elements_per_thread_x);
+  int grid_x = dimsB.x / threads.x / elements_per_thread_y;
+  int grid_y = dimsA.y / threads.y / elements_per_thread_x;
 
   dim3 grid(grid_x, grid_y, 1);
 
