@@ -80,7 +80,7 @@ def run_performance_tests():
     
     # Test configurations
     block_sizes = [16, 32]
-    elements_per_thread_values = [1, 2, 4, 6, 8]
+    elements_per_thread_values = [1, 2, 4, 6, 8, 12, 14, 16]
     
     results = []
     total_tests = len(block_sizes) * len(elements_per_thread_values) ** 2

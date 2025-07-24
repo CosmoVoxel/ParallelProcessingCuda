@@ -111,7 +111,7 @@ def main():
     
     # Test configurations
     block_sizes = [16, 32]
-    elements_per_thread_values = [1, 2, 4]
+    elements_per_thread_values = [1, 2, 4, 6, 8, 12, 14, 16]
     
     configurations = list(itertools.product(
         block_sizes,
