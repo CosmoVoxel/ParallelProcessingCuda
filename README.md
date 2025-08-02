@@ -93,8 +93,11 @@ The project includes a **comprehensive performance testing infrastructure** that
 
 Current benchmarking shows exceptional performance across multiple configurations:
 
-Teoretical CGMA... 
-(TODO: IMG)
+Teoretical CGMA:
+<img width="615" height="440" alt="image" src="https://github.com/user-attachments/assets/8016628a-e09c-4d34-b625-5e6baba17eee" />
+
+Effectivness: 
+<img width="1316" height="1359" alt="image" src="https://github.com/user-attachments/assets/848dc173-c80e-43e4-9fc1-63d70f287ff3" />
 
 
 ### Theoretical Performance Analysis
