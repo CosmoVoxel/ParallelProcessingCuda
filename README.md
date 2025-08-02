@@ -13,7 +13,7 @@ This project demonstrates the evolution from a university-level CUDA implementat
 - 🚀 **Advanced Tiled Matrix Multiplication** with shared memory optimization
 - ⚡ **Template Metaprogramming** for compile-time configuration and optimization  
 - 🎯 **Multiple Elements Per Thread** strategy for maximized GPU utilization
-- 📊 **Automated Performance Benchmarking** with nvprof integration
+- 📊 **Automated Performance Benchmarking** with nvprof integration (Compute <8.0)
 - 🔧 **Configurable Build System** supporting various optimization strategies
 - 🛡️ **Production-Grade Error Handling** with comprehensive CUDA error checking
 
@@ -93,12 +93,9 @@ The project includes a **comprehensive performance testing infrastructure** that
 
 Current benchmarking shows exceptional performance across multiple configurations:
 
-| Configuration | Performance (GFlop/s) | Execution Time (ms) | Memory Efficiency |
-|---------------|----------------------|-------------------|------------------|
-| Block=16, EPT=4 | **1,694.79** | 4.834 | Optimal |
-| Block=16, EPT=2 | 1,649.92 | 4.965 | High |
-| Block=32, EPT=4 | 1,580.45 | 5.185 | High |
-| Block=16, EPT=1 | 1,430.07 | 5.728 | Good |
+Teoretical CGMA... 
+(TODO: IMG)
+
 
 ### Theoretical Performance Analysis
 
@@ -290,13 +287,3 @@ Validated performance across **multiple GPU architectures**:
 - RTX 30xx, 40xx series (consumer/workstation)
 - Quadro RTX series (professional)
 - Compute Capability 3.0+ support
-
----
-
-## Conclusion
-
-This CUDA matrix multiplication implementation represents a **transformation from academic exercise to production-grade software**, demonstrating the technical expertise and engineering discipline required for **senior positions in high-performance computing**. The combination of advanced algorithmic optimization, comprehensive testing infrastructure, and professional coding practices makes this project an exemplary showcase of GPU computing excellence.
-
-The project's evolution from basic concepts to sophisticated optimization techniques mirrors the **career development path of a senior GPU programmer**, making it an ideal demonstration of readiness for **leadership roles in HPC engineering teams**.
-
-*Ready to deploy in production environments where performance, reliability, and maintainability are paramount.*
